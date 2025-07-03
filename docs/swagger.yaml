@@ -1,0 +1,148 @@
+definitions:
+  handler.RefreshRequest:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    required:
+    - access_token
+    - refresh_token
+    type: object
+  response.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  response.LogoutResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.TokensResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  response.UserResponse:
+    properties:
+      user_id:
+        type: string
+    type: object
+info:
+  contact: {}
+  title: '---'
+paths:
+  /auth/logout:
+    post:
+      consumes:
+      - application/json
+      description: Деавторизация по access токену (удаление всех сессий)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешная деавторизация
+          schema:
+            $ref: '#/definitions/response.LogoutResponse'
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Деавторизация пользователя
+      tags:
+      - auth
+  /auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Обновляет access и refresh токены по действующей паре
+      parameters:
+      - description: Текущая пара токенов
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.RefreshRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Токены успешно обновлены
+          schema:
+            $ref: '#/definitions/response.TokensResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Обновить пару токенов
+      tags:
+      - auth
+  /auth/token:
+    post:
+      consumes:
+      - application/json
+      description: Генерирует access и refresh токены для пользователя
+      parameters:
+      - description: User ID (GUID)
+        in: query
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Токены успешно сгенерированы
+          schema:
+            $ref: '#/definitions/response.TokensResponse'
+        "400":
+          description: Неверный запрос
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Получить пару токенов
+      tags:
+      - auth
+  /me:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает user_id из access токена
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Успешно получен user_id
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "401":
+          description: Неавторизованный доступ
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Получить GUID текущего пользователя
+      tags:
+      - auth
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

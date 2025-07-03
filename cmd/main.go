@@ -1,6 +1,7 @@
 package main
 
 import (
+	_ "medods-auth/docs"
 	"medods-auth/internal/auth/token"
 	"medods-auth/internal/config"
 	"medods-auth/internal/db"
@@ -10,6 +11,10 @@ import (
 	"go.uber.org/zap"
 )
 
+// @Title						---
+// @securityDefinitions.apikey	BearerAuth
+// @in							header
+// @name						Authorization
 func main() {
 	if err := logger.Init(); err != nil {
 		panic(err)
